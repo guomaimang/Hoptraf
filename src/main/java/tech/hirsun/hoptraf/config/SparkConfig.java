@@ -18,7 +18,9 @@ public class SparkConfig {
 
     @Bean
     public SparkConf sparkConf() {
+
         return new SparkConf()
+                .set("spark.ui.enabled","false")
                 .setAppName(appName)
                 .setMaster(sparkMasterUri);
     }

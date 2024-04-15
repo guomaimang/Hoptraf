@@ -1,0 +1,10 @@
+Id,titre,description,service,date
+1,Problème de machine,La machine est en panne,Production,2022-01-15
+3,Fuite d'eau,Fuite d'eau dans le stock,Logistique,2022-01-15
+4,Erreur informatique,Problème avec le système informatique,Informatique,2021-04-22
+5,Incident de sécurité,Tentative d'intrusion dans le réseau,Sécurité,2021-04-18
+6,Problème d'approvisionnement,Retard dans la livraison des matières premières,Production,2019-06-02
+7,Problème de machine-outil,La machine-outil ne fonctionne pas correctement,Maintenance,2023-07-12
+8,Retard de livraison,Livraison en retard pour les produits finis,Logistique,2019-08-28
+9,Problème logiciel,Bug critique dans le logiciel de comptabilité,Informatique,2019-04-22
+10,Tentative d'intrusion,Tentative d'accès non autorisé aux serveurs,Sécurité,2019-10-09
