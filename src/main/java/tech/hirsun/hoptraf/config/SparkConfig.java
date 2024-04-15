@@ -13,15 +13,14 @@ public class SparkConfig {
 
     @Value("${spark.app.name}")
     private String appName;
-
     @Value("${spark.master.uri}")
-    private String masterUri;
+    private String sparkMasterUri;
 
     @Bean
     public SparkConf sparkConf() {
         return new SparkConf()
                 .setAppName(appName)
-                .setMaster(masterUri);
+                .setMaster(sparkMasterUri);
     }
 
     @Bean
@@ -32,9 +31,9 @@ public class SparkConfig {
 
     @Bean
     public SparkSession sparkSession() {
-        return SparkSession.builder()
+        return SparkSession
+                .builder()
                 .sparkContext(javaSparkContext().sc())
                 .getOrCreate();
     }
-
 }

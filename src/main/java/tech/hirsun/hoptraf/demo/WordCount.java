@@ -17,8 +17,8 @@ public class WordCount {
     @Resource
     private JavaSparkContext javaSparkContext;
 
-    public void testSparkText() {
-        String file = "D:\\TEMP\\word.txt";
+    public String testSparkText() {
+        String file = "src/main/resources/wordcount.txt";
         JavaRDD<String> fileRDD =  javaSparkContext.textFile(file);
 
         JavaRDD<String> wordsRDD = fileRDD.flatMap(line -> Arrays.asList(line.split(" ")).iterator());
@@ -27,7 +27,7 @@ public class WordCount {
 
         //输出结果
         List<Tuple2<String, Integer>> result = wordAndCountRDD.collect();
-        result.forEach(System.out::println);
+        return result.toString();
     }
 
 }
