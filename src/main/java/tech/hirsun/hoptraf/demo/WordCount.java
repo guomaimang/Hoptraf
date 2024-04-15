@@ -1,4 +1,4 @@
-package demo;
+package tech.hirsun.hoptraf.demo;
 
 import jakarta.annotation.Resource;
 import org.apache.spark.api.java.JavaPairRDD;
