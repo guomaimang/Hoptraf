@@ -1,4 +1,4 @@
-package tech.hirsun.hoptraf.dao;
+package dao;
 
 public interface TrafficDataDao {
 }

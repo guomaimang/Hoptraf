@@ -1,4 +1,4 @@
-package tech.hirsun.hoptraf.config;
+package config;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
