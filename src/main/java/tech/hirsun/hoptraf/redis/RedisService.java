@@ -58,4 +58,10 @@ public class RedisService {
         }
     }
 
+    public void clear() {
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.flushDB();
+        }
+    }
+
 }

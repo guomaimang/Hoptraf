@@ -28,12 +28,18 @@ public class ReadTrafRecordsTask {
     @Autowired
     private DriverService driverService;
 
-    private Date lastReadTime = TimeConfig.getInitTime();
+    @Autowired
+    private TimeConfig timeConfig;
+
+    private Date lastReadTime;
 
     @Scheduled(cron ="*/10 * * * * ?")
     public void readRecords() {
+        if (lastReadTime == null) {
+            lastReadTime = timeConfig.getInitTime();
+        }
 
-        Date cutOffTime = TimeConfig.getCurrentTime();
+        Date cutOffTime = timeConfig.getCurrentTime();
 
         // format: 2017-01-01 08:00:00
         String cutOffDatePrint = String.format("%tF %tT", cutOffTime, cutOffTime);

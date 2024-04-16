@@ -5,17 +5,19 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+@Getter
 @Component
 public class TimeConfig {
-    @Getter
-    private static final Date initTime = new Date("2017/01/01 08:00:00");
+    private final Date initTime = new Date("2017/01/01 08:00:00");
 
     // calculate the second between lastReadTime and new
-    @Getter
-    private static final long deltaSeconds = new Date().getTime() - initTime.getTime();
+    private long deltaSeconds = new Date().getTime() - initTime.getTime();
 
-    public static Date getCurrentTime() {
+    public Date getCurrentTime() {
         return new Date(new Date().getTime() - deltaSeconds);
     }
 
+    public void resetTime() {
+        deltaSeconds = new Date().getTime() - initTime.getTime();
+    }
 }
