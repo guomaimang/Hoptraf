@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Home - Hoptraf</title>
+    <title>Event Report List - Hoptraf</title>
     <!-- jqgrid ui -->
     <link href="plugins/jqgrid-5.7.0/ui.jqgrid-bootstrap4.css" rel="stylesheet"/>
     <link rel="stylesheet" href="plugins/bootstrap/css/bootstrap.css">
@@ -116,7 +116,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1 class="m-0 text-dark">Real-time Driver List</h1>
+                        <h1 class="m-0 text-dark">Event Report List</h1>
                     </div><!-- /.col -->
                     <div class="col-sm-10">
                         Last update time: <span id="lastUpdateTime"> ...</span>
@@ -140,6 +140,9 @@
                                 <button class="btn btn-info" onclick="reload()"><i
                                         class="fa fa-refresh"></i>&nbsp;Refresh
                                 </button>
+
+                                <label for="searchInput"></label><input type="text" id="searchInput">
+                                <button id="searchButton">UniSearch</button>
                             </div>
                             <table id="jqGrid" class="table table-bordered">
                             </table>
@@ -180,7 +183,7 @@
 <script src="plugins/sweetalert/sweetalert.min.js"></script>
 <script src="plugins/jqgrid-5.7.0/jquery.jqGrid.min.js"></script>
 
-<script src="dist/js/index.js"></script>
+<script src="dist/js/eventreport.js"></script>
 <script src="dist/js/utils.js"></script>
 
 <!-- AdminLTE App -->

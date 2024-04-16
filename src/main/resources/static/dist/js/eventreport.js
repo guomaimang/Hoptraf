@@ -5,20 +5,15 @@ $(function () {
 
     $("#jqGrid").jqGrid({
         // 设置API
-        url: '/api/driver/list',
+        url: '/api/eventreport/list',
         datatype: "json",
         colModel: [
             // 设置列表表头
-            {label: 'DriverID', name: 'driverID', index: 'driverID', width: 30, key: true, hidden: false},
-            {label: 'CarPlateNumber', name: 'carPlateNumber', index: 'carPlateNumber', width: 30},
-            {label: 'Speed', name: 'speed', index: 'speed', width: 30, editable: true, formatter: kmhFormatter},
-            {label: 'RapidlySpeedup', name: 'isRapidlySpeedup', index: 'isRapidlySpeedup', width: 30, editable: true, formatter: statusFormatter},
-            {label: 'RapidlySlowdown', name: 'isRapidlySlowdown', index: 'isRapidlySlowdown', width: 30, editable: true, formatter: statusFormatter},
-            {label: 'NeutralSlide', name: 'isNeutralSlide', index: 'isNeutralSlide', width: 30, editable: true, formatter: statusFormatter},
-            {label: 'OverSpeed', name: 'isOverspeed', index: 'isOverspeed', width: 30, editable: true, formatter: statusFormatter},
-            {label: 'FatigueDriving', name: 'isFatigueDriving', index: 'isFatigueDriving', width: 30, editable: true, formatter: statusFormatter},
-            {label: 'HthrottleStop', name: 'isHthrottleStop', index: 'isHthrottleStop', width: 30, editable: true, formatter: statusFormatter},
-            {label: 'OilLeak', name: 'isOilLeak', index: 'isOilLeak', width: 30, editable: true, formatter: statusFormatter},
+            {label: 'Event ID', name: 'id', index: 'id', width: 10, key: true, hidden: false},
+            {label: 'Driver ID', name: 'driverId', index: 'driverId', width: 20},
+            {label: 'Card Plate Num', name: 'carPlateNumber', index: 'carPlateNumber', width: 20},
+            {label: 'Behavior', name: 'behavior', index: 'behavior', width: 60},
+            {label: 'Report Time', name: 'reportTime', index: 'reportTime', width: 30, editable: true, formatter: utcToLocalFormatter},
         ],
         height: 560,
         rowNum: 10,
@@ -31,14 +26,14 @@ $(function () {
         multiselect: false,
         pager: "#jqGridPager",
         jsonReader: {
-            root: "data",
+            root: "data.rows",
             records: "data.count",
             page: "data.currentPage",
             total: "data.totalPage",
         },
         prmNames: {
-            page: "pagenum",
-            rows: "pagesize",
+            page: "pageNum",
+            rows: "pageSize",
             order: "order",
         },
         gridComplete: function () {
@@ -53,9 +48,18 @@ $(function () {
         },
     });
 
+    $("#searchButton").click(function(){
+        let keyword = $("#searchInput").val(); //获取输入框的值
+        $("#jqGrid").jqGrid('setGridParam',{
+            postData: {'keyword': keyword}, //设置postData参数
+            page: 1
+        }).trigger("reloadGrid"); //重新加载JqGrid
+    });
+
     $(window).resize(function () {
         $("#jqGrid").setGridWidth($(".card-body").width());
     });
+
 
 });
 
@@ -71,13 +75,6 @@ function reload() {
     updateTimeText();
 }
 
-function statusFormatter(cellValue) {
-    return cellValue == 1 ? "Yes" : "No";
-}
-
-function kmhFormatter(cellValue) {
-    return cellValue + " km/h";
-}
 
 function updateTimeText() {
     $.ajax({
@@ -121,3 +118,8 @@ function updateCountdownDisplay() {
 }
 
 
+function utcToLocalFormatter(cellValue) {
+    let date = new Date(cellValue);
+    return date.toLocaleString();
+
+}
