@@ -13,7 +13,7 @@ public class RegisteredDrivers {
         driversSet.add(driver);
     }
 
-    public Set AllDrivers() {
+    public Set getAllDrivers() {
         return driversSet;
     }
 

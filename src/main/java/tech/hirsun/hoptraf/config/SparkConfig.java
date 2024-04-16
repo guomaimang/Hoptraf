@@ -17,6 +17,7 @@ public class SparkConfig {
 
     @Value("${spark.app.name}")
     private String appName;
+
     @Value("${spark.master.uri}")
     private String sparkMasterUri;
 
@@ -75,6 +76,5 @@ public class SparkConfig {
 
         return sparkSession;
     }
-
 
 }

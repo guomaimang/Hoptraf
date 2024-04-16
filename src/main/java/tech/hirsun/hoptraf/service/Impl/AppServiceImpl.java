@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.hirsun.hoptraf.config.TimeConfig;
+import tech.hirsun.hoptraf.dao.EventReportDao;
 import tech.hirsun.hoptraf.redis.RedisService;
 import tech.hirsun.hoptraf.service.AppService;
 import tech.hirsun.hoptraf.service.databean.RegisteredDrivers;
@@ -19,6 +20,9 @@ public class AppServiceImpl implements AppService {
     @Autowired
     private TimeConfig timeConfig;
 
+    @Autowired
+    private EventReportDao eventReportDao;
+
     @PostConstruct
     @Override
     public void initApp() {
@@ -26,6 +30,7 @@ public class AppServiceImpl implements AppService {
         redisService.clear();
 
         // reset mysql
+        eventReportDao.deleteAll();
     }
 
     @Override
@@ -40,5 +45,6 @@ public class AppServiceImpl implements AppService {
         redisService.clear();
 
         // reset mysql
+        eventReportDao.deleteAll();
     }
 }
