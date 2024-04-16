@@ -1,3 +1,4 @@
+
 $(function () {
 
     //隐藏错误提示框
@@ -9,8 +10,8 @@ $(function () {
         datatype: "json",
         colModel: [
             // 设置列表表头
-            {label: 'Event ID', name: 'id', index: 'id', width: 10, key: true, hidden: false},
-            {label: 'Driver ID', name: 'driverId', index: 'driverId', width: 20},
+            {label: 'Event ID', name: 'id', index: 'id', width: 15},
+            {label: 'Driver ID', name: 'driverId', index: 'driverId', width: 20, key: true, hidden: false},
             {label: 'Card Plate Num', name: 'carPlateNumber', index: 'carPlateNumber', width: 20},
             {label: 'Behavior', name: 'behavior', index: 'behavior', width: 60},
             {label: 'Report Time', name: 'reportTime', index: 'reportTime', width: 30, editable: true, formatter: utcToLocalFormatter},
@@ -44,7 +45,7 @@ $(function () {
             //返回选中的id
             let selectedRowIndex = $("#" + this.id).getGridParam('selrow');
             //返回点击这行xlmc的值
-            window.open("/driver.html?driverid=" + selectedRowIndex);
+            window.open("/driver.html?driverId=" + selectedRowIndex);
         },
     });
 
@@ -121,5 +122,6 @@ function updateCountdownDisplay() {
 function utcToLocalFormatter(cellValue) {
     let date = new Date(cellValue);
     return date.toLocaleString();
-
 }
+
+updateTimeText();

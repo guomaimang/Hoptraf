@@ -21,8 +21,10 @@ public class Driver {
     private double latitude;
     private double longitude;
     private int speed;
+
     private int direction;
     private String siteName;
+
     private int isRapidlySpeedup;
     private int isRapidlySlowdown;
     private int isNeutralSlide;

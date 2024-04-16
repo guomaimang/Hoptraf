@@ -1,3 +1,4 @@
+
 $(function () {
 
     //隐藏错误提示框
@@ -121,3 +122,9 @@ function updateCountdownDisplay() {
 }
 
 
+function utcToLocalFormatter(cellValue) {
+    let date = new Date(cellValue);
+    return date.toLocaleString();
+}
+
+updateTimeText();

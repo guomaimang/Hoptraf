@@ -1,77 +1,129 @@
-function contentsPreparation(){
-    let id = getQueryParam("id");
+let driverId = getQueryParam("driverId");
 
-    //请求数据
+$(function () {
+
+    //隐藏错误提示框
+    $('.alert-danger').css("display", "none");
+
+    $("#jqGrid").jqGrid({
+        // 设置API
+        url: '/api/eventreport/list?driverId=' + driverId,
+        datatype: "json",
+        colModel: [
+            // 设置列表表头
+            {label: 'Event ID', name: 'id', index: 'id', width: 15, key: true, hidden: false},
+            {label: 'Driver ID', name: 'driverId', index: 'driverId', width: 20},
+            {label: 'Card Plate Num', name: 'carPlateNumber', index: 'carPlateNumber', width: 20},
+            {label: 'Behavior', name: 'behavior', index: 'behavior', width: 60},
+            {label: 'Report Time', name: 'reportTime', index: 'reportTime', width: 30, editable: true, formatter: utcToLocalFormatter},
+        ],
+        height: 560,
+        rowNum: 10,
+        rowList: [10, 20, 50],
+        styleUI: 'Bootstrap',
+        loadtext: 'Information reading in progress...',
+        rownumbers: false,
+        rownumWidth: 20,
+        autowidth: true,
+        multiselect: false,
+        pager: "#jqGridPager",
+        jsonReader: {
+            root: "data.rows",
+            records: "data.count",
+            page: "data.currentPage",
+            total: "data.totalPage",
+        },
+        prmNames: {
+            page: "pageNum",
+            rows: "pageSize",
+            order: "order",
+        },
+        gridComplete: function () {
+            //隐藏grid底部滚动条
+            $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
+        },
+        onSelectRow: function () {
+            //返回选中的id
+            let selectedRowIndex = $("#" + this.id).getGridParam('selrow');
+            //返回点击这行xlmc的值
+            window.open("/driver.html?driverId=" + selectedRowIndex);
+        },
+    });
+
+    $("#searchButton").click(function(){
+        let keyword = $("#searchInput").val(); //获取输入框的值
+        $("#jqGrid").jqGrid('setGridParam',{
+            postData: {'keyword': keyword}, //设置postData参数
+            page: 1
+        }).trigger("reloadGrid"); //重新加载JqGrid
+    });
+
+    $(window).resize(function () {
+        $("#jqGrid").setGridWidth($(".card-body").width() * 2);
+    });
+
+
+});
+
+/**
+ * jqGrid 重新加载
+ */
+function reload() {
+    let page = $("#jqGrid").jqGrid('getGridParam', 'page');
+    $("#jqGrid").jqGrid('setGridParam', {
+        page: page
+    }).trigger("reloadGrid");
+
+    updateTimeText();
+}
+
+
+function updateTimeText() {
     $.ajax({
-        url: "/goods/info",
-        data: {id: id},
-        type: 'GET',
-        beforeSend: function (request) {
-            //设置header值
-            request.setRequestHeader("jwt", window.localStorage.getItem("jwt"));
-        },
+        url: "/api/app/getcutofftime",
+        type: "GET",
         success: function (r) {
-            if (r.code === 0 && r.data != null) {
-                //填充数据 至 card
-                $('#card-id').text(r.data.id);
-                $('#card-name').text(r.data.name);
-                $('#card-title').text(r.data.title);
-                $('#card-price').text(priceFormatter(r.data.price));
-                $('#card-stock').text(r.data.stock);
-                $('#card-isAvailable').text(isAvailableFormatter(r.data.isAvailable));
-                document.getElementById("card-imageUri").src = isNull(r.data.imageUri)? "https://pic.hanjiaming.com.cn/2024/03/24/fec4e63dcce3f.jpg": r.data.imageUri;
-                editorD.txt.html(r.data.description);
-                if (r.data.isAvailable === 1){
-                    let buyButton = document.getElementById("buyButton");
-                    buyButton.disabled = false;
-                }
-            }else {
-                swal(r.msg, {
-                    icon: "error",
-                });
+            if (r.code === 0) {
+                document.getElementById("cutoffTime").innerText = utcToLocalFormatter(r.data);
+                document.getElementById("lastUpdateTime").innerText = new Date().toLocaleString();
             }
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            // 处理错误
-            console.log(textStatus, errorThrown);
         }
     });
 }
 
+// 倒计时
+let countdown = 30;
+let intervalId = setInterval(function() {
+    // 每秒减少倒计时的时间
+    countdown--;
+    // 更新页面上的倒计时显示
+    updateCountdownDisplay();
 
-let editorD;
-//富文本编辑器
-const E = window.wangEditor;
-editorD = new E('#wangEditor')
-// 设置编辑区域高度为 400px
-editorD.config.height = 800
-//配置服务端图片上传地址
-editorD.config.uploadImgServer = 'images/upload'
-editorD.config.uploadFileName = 'file'
-//限制图片大小 2M
-editorD.config.uploadImgMaxSize = 2 * 1024 * 1024
-//限制一次最多能传几张图片 一次最多上传 1 个图片
-editorD.config.uploadImgMaxLength = 1
-//插入网络图片的功能
-editorD.config.showLinkImg = true
-editorD.create();
-editorD.disable();
+    // 如果倒计时结束
+    if (countdown === 0) {
+        // 停止定时器
+        clearInterval(intervalId);
 
-function buyButtonClick() {
-    let id = getQueryParam("id");
-    window.location.href = "order-submission.html?id=" + id;
+        // 执行倒计时结束后执行
+        reload();
+
+        // 重置倒计时的时间
+        countdown = 30;
+        intervalId = setInterval(arguments.callee, 1000);
+    }
+}, 1000);
+
+// 定义一个函数用于更新页面上显示的倒计时
+function updateCountdownDisplay() {
+    // 假设你有一个 id 为 'countdown' 的元素用于显示倒计时
+    document.getElementById('updateCountdown').innerText = countdown + 's';
 }
 
-/**
- * isFrozen formatter
- * @returns {string}
- */
-function priceFormatter(cellValue) {
-    return "HKD " + cellValue;
+
+function utcToLocalFormatter(cellValue) {
+    let date = new Date(cellValue);
+    return date.toLocaleString();
+
 }
 
-function isAvailableFormatter(cellValue) {
-    return cellValue == 1 ? "Yes" : "No";
-}
-
-contentsPreparation();
+updateTimeText();
