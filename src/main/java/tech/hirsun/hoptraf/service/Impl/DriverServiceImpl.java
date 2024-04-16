@@ -55,17 +55,12 @@ public class DriverServiceImpl implements DriverService {
 
             // check if driver exists in redis
             Driver driver = redisService.get(DriverKey.byId, record.getDriverID(), Driver.class);
-            DriverBehaviors driverBehaviors = redisService.get(DriverBehaviorsKey.byId, record.getDriverID(), DriverBehaviors.class);
 
             // if not exists, create a new driver
             if (driver == null) {
                 driver = new Driver();
                 driver.setDriverID(record.getDriverID());
                 driver.setCarPlateNumber(record.getCarPlateNumber());
-            }
-            if (driverBehaviors == null) {
-                driverBehaviors = new DriverBehaviors();
-                driverBehaviors.setDriverID(record.getDriverID());
             }
 
             // update driver real-time info
@@ -78,21 +73,30 @@ public class DriverServiceImpl implements DriverService {
             driver.setDirection(record.getDirection());
 
             // update driver behavior info
-            driverBehaviors.setSiteName(record.getSiteName() == null ? driverBehaviors.getSiteName() : record.getSiteName());
-            driverBehaviors.setIsRapidlySpeedup(record.getIsRapidlySpeedup() == 1 ? 1 : driverBehaviors.getIsRapidlySpeedup());
-            driverBehaviors.setIsRapidlySlowdown(record.getIsRapidlySlowdown() == 1 ? 1 : driverBehaviors.getIsRapidlySlowdown());
-
-            driverBehaviors.setIsNeutralSlide(record.getIsNeutralSlide() == 1 ? 1 : driverBehaviors.getIsNeutralSlide());
-            driverBehaviors.setIsNeutralSlideFinished(record.getIsNeutralSlideFinished() == 1 ? 1 : driverBehaviors.getIsNeutralSlideFinished());
-            driverBehaviors.setNeutralSlideTime(record.getNeutralSlideTime() == 0 ? driverBehaviors.getNeutralSlideTime() : record.getNeutralSlideTime());
-
-            driverBehaviors.setIsOverspeed(record.getIsOverspeed() == 1 ? 1 : driverBehaviors.getIsOverspeed());
-            driverBehaviors.setIsOverspeedFinished(record.getIsOverspeedFinished() == 1 ? 1 : driverBehaviors.getIsOverspeedFinished());
-            driverBehaviors.setOverspeedTime(record.getOverspeedTime() == 0 ? driverBehaviors.getOverspeedTime() : record.getOverspeedTime());
-
-            driverBehaviors.setIsFatigueDriving(record.getIsFatigueDriving() == 1 ? 1 : driverBehaviors.getIsFatigueDriving());
-            driverBehaviors.setIsHthrottleStop(record.getIsHthrottleStop() == 1 ? 1 : driverBehaviors.getIsHthrottleStop());
-            driverBehaviors.setIsOilLeak(record.getIsOilLeak() == 1 ? 1 : driverBehaviors.getIsOilLeak());
+            if (record.getSiteName() != null){
+                redisService.set(DriverBehaviorsKey.attributeById, record.getDriverID() + "_" + "siteName", record.getSiteName());
+            }
+            if (record.getIsRapidlySpeedup() == 1) {
+                redisService.set(DriverBehaviorsKey.attributeById, record.getDriverID() + "_" + "isRapidlySpeedup", "1");
+            }
+            if (record.getIsRapidlySlowdown() == 1) {
+                redisService.set(DriverBehaviorsKey.attributeById, record.getDriverID() + "_" + "isRapidlySlowdown", "1");
+            }
+            if (record.getIsNeutralSlide() == 1) {
+                redisService.set(DriverBehaviorsKey.attributeById, record.getDriverID() + "_" + "isNeutralSlide", "1");
+            }
+            if (record.getIsOverspeed() == 1) {
+                redisService.set(DriverBehaviorsKey.attributeById, record.getDriverID() + "_" + "isOverspeed", "1");
+            }
+            if (record.getIsFatigueDriving() == 1) {
+                redisService.set(DriverBehaviorsKey.attributeById, record.getDriverID() + "_" + "isFatigueDriving", "1");
+            }
+            if (record.getIsHthrottleStop() == 1) {
+                redisService.set(DriverBehaviorsKey.attributeById, record.getDriverID() + "_" + "isHthrottleStop", "1");
+            }
+            if (record.getIsOilLeak() == 1) {
+                redisService.set(DriverBehaviorsKey.attributeById, record.getDriverID() + "_" + "isOilLeak", "1");
+            }
 
             // update history data
             driver.setRapidlySpeedupTimes(record.getIsRapidlySpeedup() == 1 ? driver.getRapidlySpeedupTimes() + 1 : driver.getRapidlySpeedupTimes());
@@ -105,7 +109,6 @@ public class DriverServiceImpl implements DriverService {
 
             // write in redis
             redisService.set(DriverKey.byId, driver.getDriverID(), driver);
-            redisService.set(DriverBehaviorsKey.byId, driverBehaviors.getDriverID(), driverBehaviors);
 
             // organize the event report
             EventReport eventReport = new EventReport();
@@ -183,7 +186,31 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public DriverBehaviors getDriverBehaviors(String driverId) {
-        return redisService.get(DriverBehaviorsKey.byId, driverId, DriverBehaviors.class);
+        DriverBehaviors driverBehaviors = new DriverBehaviors();
+
+        driverBehaviors.setSiteName(redisService.get(DriverBehaviorsKey.attributeById, driverId + "_" + "siteName", String.class));
+        if (redisService.get(DriverBehaviorsKey.attributeById, driverId + "_" + "isRapidlySpeedup", String.class) != null) {
+            driverBehaviors.setIsRapidlySpeedup(1);
+        }
+        if (redisService.get(DriverBehaviorsKey.attributeById, driverId + "_" + "isRapidlySlowdown", String.class) != null) {
+            driverBehaviors.setIsRapidlySlowdown(1);
+        }
+        if (redisService.get(DriverBehaviorsKey.attributeById, driverId + "_" + "isNeutralSlide", String.class) != null) {
+            driverBehaviors.setIsNeutralSlide(1);
+        }
+        if (redisService.get(DriverBehaviorsKey.attributeById, driverId + "_" + "isOverspeed", String.class) != null) {
+            driverBehaviors.setIsOverspeed(1);
+        }
+        if (redisService.get(DriverBehaviorsKey.attributeById, driverId + "_" + "isFatigueDriving", String.class) != null) {
+            driverBehaviors.setIsFatigueDriving(1);
+        }
+        if (redisService.get(DriverBehaviorsKey.attributeById, driverId + "_" + "isHthrottleStop", String.class) != null) {
+            driverBehaviors.setIsHthrottleStop(1);
+        }
+        if (redisService.get(DriverBehaviorsKey.attributeById, driverId + "_" + "isOilLeak", String.class) != null) {
+            driverBehaviors.setIsOilLeak(1);
+        }
+        return driverBehaviors;
     }
 
     @Override
@@ -208,7 +235,7 @@ public class DriverServiceImpl implements DriverService {
                 "ORDER BY time_window");
 
         // Convert the result to a map
-        Map<Timestamp, Double> result = new HashMap<>();
+        TreeMap<Timestamp, Double> result = new TreeMap<>();
         for (Row row : df.collectAsList()) {
             Timestamp windowStart = row.getStruct(0).getAs("start");
             Double avgSpeed = row.getDouble(1);

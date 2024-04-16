@@ -6,4 +6,5 @@ public class DriverBehaviorsKey extends BasePrefix{
         super(25, prefix);
     }
     public static DriverBehaviorsKey byId = new DriverBehaviorsKey("id");
+    public static DriverBehaviorsKey attributeById = new DriverBehaviorsKey("elementById");
 }
