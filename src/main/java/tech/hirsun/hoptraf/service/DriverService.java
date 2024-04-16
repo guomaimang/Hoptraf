@@ -4,6 +4,7 @@ import org.apache.hadoop.util.hash.Hash;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import tech.hirsun.hoptraf.pojo.Driver;
+import tech.hirsun.hoptraf.pojo.DriverBehaviors;
 
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,5 @@ public interface DriverService {
 
     public List getDriverList();
 
-
-
+    public DriverBehaviors getDriverBehaviors(String driverId);
 }

@@ -26,6 +26,11 @@ public class DriverController {
         return Result.success(driverService.getDriverInfo(driverId));
     }
 
+    @GetMapping("/behavior")
+    public Result behavior(@RequestParam String driverId) {
+        return Result.success(driverService.getDriverBehaviors(driverId));
+    }
+
     @GetMapping("/diagram")
     public Result diagram(@RequestParam String driverId) {
         return Result.success(driverService.getDriverDiagram(driverId));

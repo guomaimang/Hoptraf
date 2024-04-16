@@ -21,21 +21,7 @@ public class Driver {
     private double latitude;
     private double longitude;
     private int speed;
-
     private int direction;
-    private String siteName;
-
-    private int isRapidlySpeedup;
-    private int isRapidlySlowdown;
-    private int isNeutralSlide;
-    private int isNeutralSlideFinished;
-    private int neutralSlideTime;
-    private int isOverspeed;
-    private int isOverspeedFinished;
-    private int overspeedTime;
-    private int isFatigueDriving;
-    private int isHthrottleStop;
-    private int isOilLeak;
 
     // History data
     private int rapidlySpeedupTimes;

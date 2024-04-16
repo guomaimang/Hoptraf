@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.hirsun.hoptraf.config.TimeConfig;
 import tech.hirsun.hoptraf.pojo.Driver;
+import tech.hirsun.hoptraf.pojo.DriverBehaviors;
 import tech.hirsun.hoptraf.pojo.EventReport;
 import tech.hirsun.hoptraf.pojo.TrafRecord;
+import tech.hirsun.hoptraf.redis.DriverBehaviorsKey;
 import tech.hirsun.hoptraf.redis.DriverKey;
 import tech.hirsun.hoptraf.redis.RedisService;
 import tech.hirsun.hoptraf.service.DriverService;
@@ -53,12 +55,17 @@ public class DriverServiceImpl implements DriverService {
 
             // check if driver exists in redis
             Driver driver = redisService.get(DriverKey.byId, record.getDriverID(), Driver.class);
+            DriverBehaviors driverBehaviors = redisService.get(DriverBehaviorsKey.byId, record.getDriverID(), DriverBehaviors.class);
 
             // if not exists, create a new driver
             if (driver == null) {
                 driver = new Driver();
                 driver.setDriverID(record.getDriverID());
                 driver.setCarPlateNumber(record.getCarPlateNumber());
+            }
+            if (driverBehaviors == null) {
+                driverBehaviors = new DriverBehaviors();
+                driverBehaviors.setDriverID(record.getDriverID());
             }
 
             // update driver real-time info
@@ -69,22 +76,23 @@ public class DriverServiceImpl implements DriverService {
 
             driver.setSpeed(record.getSpeed());
             driver.setDirection(record.getDirection());
-            driver.setSiteName(record.getSiteName());
 
-            driver.setIsRapidlySpeedup(record.getIsRapidlySpeedup());
-            driver.setIsRapidlySlowdown(record.getIsRapidlySlowdown());
+            // update driver behavior info
+            driverBehaviors.setSiteName(record.getSiteName() == null ? driverBehaviors.getSiteName() : record.getSiteName());
+            driverBehaviors.setIsRapidlySpeedup(record.getIsRapidlySpeedup() == 1 ? 1 : driverBehaviors.getIsRapidlySpeedup());
+            driverBehaviors.setIsRapidlySlowdown(record.getIsRapidlySlowdown() == 1 ? 1 : driverBehaviors.getIsRapidlySlowdown());
 
-            driver.setIsNeutralSlide(record.getIsNeutralSlide());
-            driver.setIsNeutralSlideFinished(record.getIsNeutralSlideFinished());
-            driver.setNeutralSlideTime(record.getNeutralSlideTime());
+            driverBehaviors.setIsNeutralSlide(record.getIsNeutralSlide() == 1 ? 1 : driverBehaviors.getIsNeutralSlide());
+            driverBehaviors.setIsNeutralSlideFinished(record.getIsNeutralSlideFinished() == 1 ? 1 : driverBehaviors.getIsNeutralSlideFinished());
+            driverBehaviors.setNeutralSlideTime(record.getNeutralSlideTime() == 0 ? driverBehaviors.getNeutralSlideTime() : record.getNeutralSlideTime());
 
-            driver.setIsOverspeed(record.getIsOverspeed());
-            driver.setIsOverspeedFinished(record.getIsOverspeedFinished());
-            driver.setOverspeedTime(record.getOverspeedTime());
+            driverBehaviors.setIsOverspeed(record.getIsOverspeed() == 1 ? 1 : driverBehaviors.getIsOverspeed());
+            driverBehaviors.setIsOverspeedFinished(record.getIsOverspeedFinished() == 1 ? 1 : driverBehaviors.getIsOverspeedFinished());
+            driverBehaviors.setOverspeedTime(record.getOverspeedTime() == 0 ? driverBehaviors.getOverspeedTime() : record.getOverspeedTime());
 
-            driver.setIsFatigueDriving(record.getIsFatigueDriving());
-            driver.setIsHthrottleStop(record.getIsHthrottleStop());
-            driver.setIsOilLeak(record.getIsOilLeak());
+            driverBehaviors.setIsFatigueDriving(record.getIsFatigueDriving() == 1 ? 1 : driverBehaviors.getIsFatigueDriving());
+            driverBehaviors.setIsHthrottleStop(record.getIsHthrottleStop() == 1 ? 1 : driverBehaviors.getIsHthrottleStop());
+            driverBehaviors.setIsOilLeak(record.getIsOilLeak() == 1 ? 1 : driverBehaviors.getIsOilLeak());
 
             // update history data
             driver.setRapidlySpeedupTimes(record.getIsRapidlySpeedup() == 1 ? driver.getRapidlySpeedupTimes() + 1 : driver.getRapidlySpeedupTimes());
@@ -97,6 +105,7 @@ public class DriverServiceImpl implements DriverService {
 
             // write in redis
             redisService.set(DriverKey.byId, driver.getDriverID(), driver);
+            redisService.set(DriverBehaviorsKey.byId, driverBehaviors.getDriverID(), driverBehaviors);
 
             // organize the event report
             EventReport eventReport = new EventReport();
@@ -173,6 +182,11 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    public DriverBehaviors getDriverBehaviors(String driverId) {
+        return redisService.get(DriverBehaviorsKey.byId, driverId, DriverBehaviors.class);
+    }
+
+    @Override
     public Map getDriverDiagram(String driverId) {
         Date initTime = timeConfig.getInitTime();
         Date cutOffTime = timeConfig.getCurrentTime();
@@ -214,5 +228,7 @@ public class DriverServiceImpl implements DriverService {
         }
         return driverList;
     }
+
+
 
 }

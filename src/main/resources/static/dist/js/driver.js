@@ -91,14 +91,6 @@ function contentsPreparation(){
                 document.getElementById("speed").innerText = kmhFormatter(r.data.speed);
                 document.getElementById("direction").innerText = r.data.direction;
 
-                document.getElementById("isRapidlySpeedup").innerText = statusFormatter(r.data.isRapidlySpeedup);
-                document.getElementById("isRapidlySlowdown").innerText = statusFormatter(r.data.isRapidlySlowdown);
-                document.getElementById("isNeutralSlide").innerText = statusFormatter(r.data.isNeutralSlide);
-                document.getElementById("isOverspeed").innerText = statusFormatter(r.data.isOverspeed);
-                document.getElementById("isFatigueDriving").innerText = statusFormatter(r.data.isFatigueDriving);
-                document.getElementById("isHthrottleStop").innerText = statusFormatter(r.data.isHthrottleStop);
-                document.getElementById("isOilLeak").innerText = statusFormatter(r.data.isOilLeak);
-
                 document.getElementById("rapidlySpeedupTimes").innerText = r.data.rapidlySpeedupTimes;
                 document.getElementById("rapidlySlowdownTimes").innerText = r.data.rapidlySlowdownTimes;
                 document.getElementById("neutralSlideTimes").innerText = r.data.neutralSlideTimes;
@@ -106,6 +98,36 @@ function contentsPreparation(){
                 document.getElementById("fatigueDrivingTimes").innerText = r.data.fatigueDrivingTimes;
                 document.getElementById("hthrottleStopTimes").innerText = r.data.hthrottleStopTimes;
                 document.getElementById("oilLeakTimes").innerText = r.data.oilLeakTimes;
+
+            }else {
+                swal(r.msg, {
+                    icon: "error",
+                });
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            // handle error
+            console.error("AJAX Error: ", textStatus, errorThrown);
+        }
+    });
+
+    // 请求 behavior
+    $.ajax({
+        url: "/api/driver/behavior",
+        type: "GET",
+        data: {
+            driverId: driverId
+        },
+        success: function(r) {
+            if (r.code === 0 && r.data != null) {
+
+                document.getElementById("isRapidlySpeedup").innerText = statusFormatter(r.data.isRapidlySpeedup);
+                document.getElementById("isRapidlySlowdown").innerText = statusFormatter(r.data.isRapidlySlowdown);
+                document.getElementById("isNeutralSlide").innerText = statusFormatter(r.data.isNeutralSlide);
+                document.getElementById("isOverspeed").innerText = statusFormatter(r.data.isOverspeed);
+                document.getElementById("isFatigueDriving").innerText = statusFormatter(r.data.isFatigueDriving);
+                document.getElementById("isHthrottleStop").innerText = statusFormatter(r.data.isHthrottleStop);
+                document.getElementById("isOilLeak").innerText = statusFormatter(r.data.isOilLeak);
 
                 // remind the driver in over speed
                 if(r.data.isOverspeed == 1){
