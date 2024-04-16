@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tech.hirsun.hoptraf.dao.EventReportDao">
+
+    <select id="list" parameterType="java.util.Map" resultType="tech.hirsun.hoptraf.pojo.EventReport">
+        SELECT * FROM `event_report`
+        <where>
+            <if test="driverId != null and driverId !='' ">
+                AND driver_id = #{driverId}
+            </if>
+            <if test="keyword != null and keyword !=''  ">
+                AND (driver_id = #{keyword} OR id = #{keyword} OR car_plate_number = #{keyword})
+            </if>
+        </where>
+        ORDER BY id DESC LIMIT #{start}, #{pageSize}
+    </select>
+
+    <select id="count" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT count(*) FROM `event_report`
+        <where>
+            <if test="driverId != null and driverId !='' ">
+                AND driver_id = #{driverId}
+            </if>
+            <if test="keyword != null and keyword !=''  ">
+                AND (driver_id = #{keyword} OR id = #{keyword} OR car_plate_number = #{keyword})
+            </if>
+        </where>
+    </select>
+
+</mapper>

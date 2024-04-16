@@ -12,6 +12,7 @@ import tech.hirsun.hoptraf.pojo.TrafRecord;
 import tech.hirsun.hoptraf.redis.DriverKey;
 import tech.hirsun.hoptraf.redis.RedisService;
 import tech.hirsun.hoptraf.service.DriverService;
+import tech.hirsun.hoptraf.service.EventReportService;
 import tech.hirsun.hoptraf.service.databean.RegisteredDrivers;
 import tech.hirsun.hoptraf.utils.DatasetUtils;
 
@@ -30,7 +31,8 @@ public class DriverServiceImpl implements DriverService {
     private RegisteredDrivers registeredDrivers;
 
     @Autowired
-    private EventReportDao eventReportDao;
+    private EventReportService eventReportService;
+
 
     @Override
     public void processRecord(Dataset<Row> records) {
@@ -97,7 +99,7 @@ public class DriverServiceImpl implements DriverService {
                 eventReport.setCarPlateNumber(record.getCarPlateNumber());
                 eventReport.setBehavior("The driver rapidly speeds up.");
                 eventReport.setReportTime(record.getTime());
-                eventReportDao.insert(eventReport);
+                eventReportService.addReport(eventReport);
             }
 
             if (record.getIsRapidlySlowdown() == 1) {
@@ -105,7 +107,7 @@ public class DriverServiceImpl implements DriverService {
                 eventReport.setCarPlateNumber(record.getCarPlateNumber());
                 eventReport.setBehavior("The driver rapidly slows down.");
                 eventReport.setReportTime(record.getTime());
-                eventReportDao.insert(eventReport);
+                eventReportService.addReport(eventReport);
             }
 
             if (record.getIsNeutralSlideFinished() == 1) {
@@ -113,7 +115,7 @@ public class DriverServiceImpl implements DriverService {
                 eventReport.setCarPlateNumber(record.getCarPlateNumber());
                 eventReport.setBehavior("The driver slides neutrally for " + record.getNeutralSlideTime() + " seconds.");
                 eventReport.setReportTime(record.getTime());
-                eventReportDao.insert(eventReport);
+                eventReportService.addReport(eventReport);
             }
 
             if (record.getIsOverspeedFinished() == 1) {
@@ -121,7 +123,7 @@ public class DriverServiceImpl implements DriverService {
                 eventReport.setCarPlateNumber(record.getCarPlateNumber());
                 eventReport.setBehavior("The driver overspeeds for " + record.getOverspeedTime() + " seconds.");
                 eventReport.setReportTime(record.getTime());
-                eventReportDao.insert(eventReport);
+                eventReportService.addReport(eventReport);
             }
 
             if (record.getIsFatigueDriving() == 1) {
@@ -129,7 +131,7 @@ public class DriverServiceImpl implements DriverService {
                 eventReport.setCarPlateNumber(record.getCarPlateNumber());
                 eventReport.setBehavior("The driver is fatigue driving.");
                 eventReport.setReportTime(record.getTime());
-                eventReportDao.insert(eventReport);
+                eventReportService.addReport(eventReport);
             }
 
             if (record.getIsHthrottleStop() == 1) {
@@ -137,7 +139,7 @@ public class DriverServiceImpl implements DriverService {
                 eventReport.setCarPlateNumber(record.getCarPlateNumber());
                 eventReport.setBehavior("The driver is hthrottle stop.");
                 eventReport.setReportTime(record.getTime());
-                eventReportDao.insert(eventReport);
+                eventReportService.addReport(eventReport);
             }
 
             if (record.getIsOilLeak() == 1) {
@@ -145,7 +147,7 @@ public class DriverServiceImpl implements DriverService {
                 eventReport.setCarPlateNumber(record.getCarPlateNumber());
                 eventReport.setBehavior("The driver is oil leak.");
                 eventReport.setReportTime(record.getTime());
-                eventReportDao.insert(eventReport);
+                eventReportService.addReport(eventReport);
             }
 
             if (record.getSiteName() != null) {
@@ -153,7 +155,7 @@ public class DriverServiceImpl implements DriverService {
                 eventReport.setCarPlateNumber(record.getCarPlateNumber());
                 eventReport.setBehavior("The driver is at " + record.getSiteName() + ".");
                 eventReport.setReportTime(record.getTime());
-                eventReportDao.insert(eventReport);
+                eventReportService.addReport(eventReport);
             }
 
         }
