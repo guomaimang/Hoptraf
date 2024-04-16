@@ -29,7 +29,6 @@ public class RedisService {
             }else{
                 jedis.setex(prefix.getPrefix() + key, prefix.getExpireSeconds(), rvalue);
             }
-            jedis.set(prefix.getPrefix() + key, rvalue);
         }
     }
 
