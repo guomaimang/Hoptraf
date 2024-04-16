@@ -5,26 +5,33 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import tech.hirsun.hoptraf.service.RecordService;
+import static tech.hirsun.hoptraf.config.TimeConfig.deltaSeconds;
+import static tech.hirsun.hoptraf.config.TimeConfig.initTime;
+
 
 import java.util.Date;
+
 
 @Slf4j
 @Component
 @EnableScheduling
 public class ReadTrafRecords {
 
-    public static Date lastReadTime = new Date("2017/01/01 08:00:00");
-    // calculate the second between lastReadTime and new
-    public static final long deltaSeconds = new Date().getTime() - lastReadTime.getTime();
+    public static Date lastReadTime = initTime;
 
     @Resource
     private SparkSession sparkSession;
 
+    @Autowired
+    private RecordService recordService;
+
     @Scheduled(cron ="*/10 * * * * ?")
-    public void sayWord() {
+    public void readRecords() {
 
         // cutOffTime = current time - deltaSeconds
         Date cutOffTime = new Date(new Date().getTime() - deltaSeconds);
@@ -40,7 +47,8 @@ public class ReadTrafRecords {
         String sqlText = "select * from driving where time >= '" + lastReadTimePrint + "' and time < '" + cutOffDatePrint + "'";
 
         Dataset<Row> result = sparkSession.sql(sqlText);
-        result.show();
+
+        recordService.processRecord(result);
     }
 
 }
