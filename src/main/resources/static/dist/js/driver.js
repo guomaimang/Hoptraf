@@ -195,7 +195,7 @@ function contentsPreparation(){
             let times = [];
             let speeds = [];
             for (let key in response.data) {
-                times.push(key.slice(5,14)); 
+                times.push(utcToLocalFormatter(key).slice(5,14));
                 speeds.push(response.data[key]);
             }
 

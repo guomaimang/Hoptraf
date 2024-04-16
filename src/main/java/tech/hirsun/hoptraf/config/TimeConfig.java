@@ -20,6 +20,4 @@ public class TimeConfig {
     public void resetTime() {
         deltaSeconds = new Date().getTime() - initTime.getTime();
     }
-
-
 }

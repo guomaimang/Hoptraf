@@ -21,6 +21,9 @@ public class SparkConfig {
     @Value("${spark.master.uri}")
     private String sparkMasterUri;
 
+    @Value("${hoptraf.data.path}")
+    private String dataPath;
+
     @Bean
     public SparkConf sparkConf() {
 
@@ -69,7 +72,7 @@ public class SparkConfig {
                 .format("csv")
                 .option("header", "false")
                 .schema(schema)
-                .csv("src/main/resources/datarecords/*");
+                .csv(dataPath);
 
         // Create a temporary view
         df.createOrReplaceTempView("driving");
