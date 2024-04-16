@@ -21,10 +21,6 @@ import java.util.Date;
 @EnableScheduling
 public class ReadTrafRecordsTask {
 
-
-    @Resource
-    private SparkSession sparkSession;
-
     @Autowired
     private DriverService driverService;
 
@@ -46,12 +42,7 @@ public class ReadTrafRecordsTask {
         String lastReadTimePrint = String.format("%tF %tT", lastReadTime, lastReadTime);
         lastReadTime = cutOffTime;
 
-        log.info("lastReadTimePrint: {}, cutOffDatePrint: {}", lastReadTimePrint, cutOffDatePrint);
-
-        String sqlText = "select * from driving where time >= '" + lastReadTimePrint + "' and time < '" + cutOffDatePrint + "'";
-        Dataset<Row> result = sparkSession.sql(sqlText);
-
-        driverService.processRecord(result);
+        driverService.processRecord(lastReadTimePrint, cutOffDatePrint);
     }
 
 }

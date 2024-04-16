@@ -1,11 +1,13 @@
 package tech.hirsun.hoptraf.service.Impl;
 
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tech.hirsun.hoptraf.dao.EventReportDao;
+import tech.hirsun.hoptraf.config.TimeConfig;
 import tech.hirsun.hoptraf.pojo.Driver;
 import tech.hirsun.hoptraf.pojo.EventReport;
 import tech.hirsun.hoptraf.pojo.TrafRecord;
@@ -16,9 +18,8 @@ import tech.hirsun.hoptraf.service.EventReportService;
 import tech.hirsun.hoptraf.service.databean.RegisteredDrivers;
 import tech.hirsun.hoptraf.utils.DatasetUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.sql.Timestamp;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -33,15 +34,21 @@ public class DriverServiceImpl implements DriverService {
     @Autowired
     private EventReportService eventReportService;
 
+    @Resource
+    private SparkSession sparkSession;
+
+    @Autowired
+    private TimeConfig timeConfig;
 
     @Override
-    public void processRecord(Dataset<Row> records) {
-        List<TrafRecord> recordList = DatasetUtils.DatasetToPojoList(records, TrafRecord.class);
+    public void processRecord(String lastReadTimePrint, String cutOffDatePrint) {
 
+        log.info("lastReadTimePrint: {}, cutOffDatePrint: {}", lastReadTimePrint, cutOffDatePrint);
+        String sqlText = "select * from driving where time >= '" + lastReadTimePrint + "' and time < '" + cutOffDatePrint + "'";
+        List<TrafRecord> recordList = DatasetUtils.DatasetToPojoList(sparkSession.sql(sqlText), TrafRecord.class);
 
         for (TrafRecord record : recordList) {
 
-            // write in redis
             registeredDrivers.addDriver(record.getDriverID());
 
             // check if driver exists in redis
@@ -80,17 +87,16 @@ public class DriverServiceImpl implements DriverService {
             driver.setIsOilLeak(record.getIsOilLeak());
 
             // update history data
-            driver.setRapidlySpeedupTimes(record.getIsRapidlySpeedup() == 1 ? driver.getIsRapidlySpeedup() + 1 : driver.getIsRapidlySpeedup());
-            driver.setRapidlySlowdownTimes(record.getIsRapidlySlowdown() == 1 ? driver.getIsRapidlySlowdown() + 1 : driver.getIsRapidlySlowdown());
-            driver.setNeutralSlideTimes(record.getIsNeutralSlideFinished() == 1 ? driver.getIsNeutralSlide() + 1 : driver.getIsNeutralSlide());
-            driver.setOverspeedTimes(record.getIsOverspeedFinished() == 1 ? driver.getIsOverspeed() + 1 : driver.getIsOverspeed());
-            driver.setFatigueDrivingTimes(record.getIsFatigueDriving() == 1 ? driver.getIsFatigueDriving() + 1 : driver.getIsFatigueDriving());
-            driver.setHthrottleStopTimes(record.getIsHthrottleStop() == 1 ? driver.getIsHthrottleStop() + 1 : driver.getIsHthrottleStop());
-            driver.setOilLeakTimes(record.getIsOilLeak() == 1 ? driver.getIsOilLeak() + 1 : driver.getIsOilLeak());
+            driver.setRapidlySpeedupTimes(record.getIsRapidlySpeedup() == 1 ? driver.getRapidlySpeedupTimes() + 1 : driver.getRapidlySpeedupTimes());
+            driver.setRapidlySlowdownTimes(record.getIsRapidlySlowdown() == 1 ? driver.getRapidlySlowdownTimes() + 1 : driver.getRapidlySlowdownTimes());
+            driver.setNeutralSlideTimes(record.getIsNeutralSlideFinished() == 1 ? driver.getNeutralSlideTimes() + 1 : driver.getNeutralSlideTimes());
+            driver.setOverspeedTimes(record.getIsOverspeedFinished() == 1 ? driver.getOverspeedTimes() + 1 : driver.getOverspeedTimes());
+            driver.setFatigueDrivingTimes(record.getIsFatigueDriving() == 1 ? driver.getFatigueDrivingTimes() + 1 : driver.getFatigueDrivingTimes());
+            driver.setHthrottleStopTimes(record.getIsHthrottleStop() == 1 ? driver.getHthrottleStopTimes() + 1 : driver.getHthrottleStopTimes());
+            driver.setOilLeakTimes(record.getIsOilLeak() == 1 ? driver.getOilLeakTimes() + 1 : driver.getOilLeakTimes());
 
             // write in redis
-            log.info("write in redis: {}", driver);
-            redisService.set(DriverKey.byId, record.getDriverID(), driver);
+            redisService.set(DriverKey.byId, driver.getDriverID(), driver);
 
             // organize the event report
             EventReport eventReport = new EventReport();
@@ -162,11 +168,40 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public void getDriverInfo(String driverId) {
+    public Driver getDriverInfo(String driverId) {
+        return redisService.get(DriverKey.byId, driverId, Driver.class);
     }
 
     @Override
-    public void getDriverDiagram(String driverId) {
+    public Map getDriverDiagram(String driverId) {
+        Date initTime = timeConfig.getInitTime();
+        Date cutOffTime = timeConfig.getCurrentTime();
+        log.info("getDriverDiagram: {}, initTime: {}, cutOffTime: {}", driverId, initTime, cutOffTime);
+
+        // Calculate the duration of each time slot in seconds
+        long durationInSeconds = (cutOffTime.getTime() - initTime.getTime()) / 1000 / 10;
+
+        // Create a Spark session
+        SparkSession spark = SparkSession.builder().appName("Java Spark SQL").getOrCreate();
+
+        // Execute the SQL query
+        Dataset<Row> df = spark.sql("SELECT window(time, '" + durationInSeconds + " seconds') as time_window, AVG(speed) as avg_speed " +
+                "FROM driving " +
+                "WHERE driverID = '" + driverId + "' " +
+                "AND time >= '" + new Timestamp(initTime.getTime()) + "' " +
+                "AND time <= '" + new Timestamp(cutOffTime.getTime()) + "' " +
+                "GROUP BY time_window " +
+                "ORDER BY time_window");
+
+        // Convert the result to a map
+        Map<Timestamp, Double> result = new HashMap<>();
+        for (Row row : df.collectAsList()) {
+            Timestamp windowStart = row.getStruct(0).getAs("start");
+            Double avgSpeed = row.getDouble(1);
+            result.put(windowStart, avgSpeed);
+        }
+
+        return result;
     }
 
     @Override

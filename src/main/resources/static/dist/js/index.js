@@ -50,7 +50,7 @@ $(function () {
             //返回选中的id
             let selectedRowIndex = $("#" + this.id).getGridParam('selrow');
             //返回点击这行xlmc的值
-            window.open("/driver.html?driverid=" + selectedRowIndex);
+            window.location.href="/driver.html?driverid=" + selectedRowIndex;
         },
     });
 
@@ -120,7 +120,6 @@ function updateCountdownDisplay() {
     // 假设你有一个 id 为 'countdown' 的元素用于显示倒计时
     document.getElementById('updateCountDown').innerText = countdown + 's';
 }
-
 
 function utcToLocalFormatter(cellValue) {
     let date = new Date(cellValue);
