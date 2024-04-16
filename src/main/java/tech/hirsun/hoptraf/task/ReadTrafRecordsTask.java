@@ -9,9 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import tech.hirsun.hoptraf.service.RecordService;
-import static tech.hirsun.hoptraf.config.TimeConfig.deltaSeconds;
-import static tech.hirsun.hoptraf.config.TimeConfig.initTime;
+import tech.hirsun.hoptraf.config.TimeConfig;
+import tech.hirsun.hoptraf.service.DriverService;
 
 
 import java.util.Date;
@@ -20,35 +19,33 @@ import java.util.Date;
 @Slf4j
 @Component
 @EnableScheduling
-public class ReadTrafRecords {
+public class ReadTrafRecordsTask {
 
-    public static Date lastReadTime = initTime;
 
     @Resource
     private SparkSession sparkSession;
 
     @Autowired
-    private RecordService recordService;
+    private DriverService driverService;
+
+    private Date lastReadTime = TimeConfig.getInitTime();
 
     @Scheduled(cron ="*/10 * * * * ?")
     public void readRecords() {
 
-        // cutOffTime = current time - deltaSeconds
-        Date cutOffTime = new Date(new Date().getTime() - deltaSeconds);
+        Date cutOffTime = TimeConfig.getCurrentTime();
 
         // format: 2017-01-01 08:00:00
         String cutOffDatePrint = String.format("%tF %tT", cutOffTime, cutOffTime);
         String lastReadTimePrint = String.format("%tF %tT", lastReadTime, lastReadTime);
-
         lastReadTime = cutOffTime;
 
         log.info("lastReadTimePrint: {}, cutOffDatePrint: {}", lastReadTimePrint, cutOffDatePrint);
 
         String sqlText = "select * from driving where time >= '" + lastReadTimePrint + "' and time < '" + cutOffDatePrint + "'";
-
         Dataset<Row> result = sparkSession.sql(sqlText);
 
-        recordService.processRecord(result);
+        driverService.processRecord(result);
     }
 
 }

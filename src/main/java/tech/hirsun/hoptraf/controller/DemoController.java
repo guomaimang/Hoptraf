@@ -6,22 +6,16 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import tech.hirsun.hoptraf.demo.WordCount;
 
 @RestController
 @RequestMapping("/demo")
 public class DemoController {
-    @Resource
-    private WordCount wordCount;
+
 
     @Resource
     private SparkSession sparkSession;
 
 
-    @RequestMapping("/wordcount")
-    public String wordCount() {
-        return wordCount.testSparkText();
-    }
 
     @RequestMapping("/sparksql")
     public String sparkSql() {
