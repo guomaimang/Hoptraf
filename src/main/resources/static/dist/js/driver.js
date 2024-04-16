@@ -195,7 +195,7 @@ function contentsPreparation(){
             let times = [];
             let speeds = [];
             for (let key in response.data) {
-                times.push(key.split('T')[1].split(':').slice(0,2).join(':')); // 提取时间并去掉年份
+                times.push(key.slice(5,14)); 
                 speeds.push(response.data[key]);
             }
 
