@@ -6,7 +6,7 @@ $(function () {
 
     $("#jqGrid").jqGrid({
         // 设置API
-        url: '/api/driver/list',
+        url: 'https://api.hoptraf.hirsun.tech/api/driver/list',
         datatype: "json",
         colModel: [
             // 设置列表表头
@@ -82,7 +82,7 @@ function kmhFormatter(cellValue) {
 
 function updateTimeText() {
     $.ajax({
-        url: "/api/app/getcutofftime",
+        url: "https://api.hoptraf.hirsun.tech/api/app/getcutofftime",
         type: "GET",
         success: function (r) {
             if (r.code === 0) {

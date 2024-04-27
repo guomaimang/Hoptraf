@@ -7,7 +7,7 @@ $(function () {
 
     $("#jqGrid").jqGrid({
         // 设置API
-        url: '/api/eventreport/list?driverId=' + driverId,
+        url: 'https://api.hoptraf.hirsun.tech/api/eventreport/list?driverId=' + driverId,
         datatype: "json",
         colModel: [
             // 设置列表表头
@@ -76,7 +76,7 @@ function contentsPreparation(){
 
     //请求基本数据
     $.ajax({
-        url: "/api/driver/info",
+        url: "https://api.hoptraf.hirsun.tech/api/driver/info",
         type: "GET",
         data: {
             driverId: driverId
@@ -113,7 +113,7 @@ function contentsPreparation(){
 
     // 请求 behavior
     $.ajax({
-        url: "/api/driver/behavior",
+        url: "https://api.hoptraf.hirsun.tech/api/driver/behavior",
         type: "GET",
         data: {
             driverId: driverId
@@ -185,7 +185,7 @@ function contentsPreparation(){
     }
 
     $.ajax({
-        url: "/api/driver/diagram",
+        url: "https://api.hoptraf.hirsun.tech/api/driver/diagram",
         type: "GET",
         data: {
             driverId: driverId
@@ -216,7 +216,7 @@ function contentsPreparation(){
 
 function updateTimeText() {
     $.ajax({
-        url: "/api/app/getcutofftime",
+        url: "https://api.hoptraf.hirsun.tech/api/app/getcutofftime",
         type: "GET",
         success: function (r) {
             if (r.code === 0) {
